@@ -1038,32 +1038,18 @@
     }
 
     submitBtn.disabled = true;
-    var sbHeaders = {
-      'apikey': SUPABASE_ANON_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
-    };
 
-    // Postgres RLS ไม่อนุญาตให้ upsert (on_conflict) แบบ single request ได้ตรงๆ
-    // ในเมื่อ anon ไม่มีสิทธิ์ SELECT (กันแขกอ่านข้อมูลคนอื่น) จึงต้อง insert ก่อน
-    // แล้วถ้าเจอ device_id ซ้ำ (409) ค่อย PATCH แก้ไขแถวเดิมแทน
-    function doInsert(){
-      return fetch(SUPABASE_URL + '/rest/v1/rsvp_responses', {
-        method: 'POST', headers: sbHeaders, body: JSON.stringify(payload)
-      });
-    }
-    function doUpdate(){
-      var patchBody = {};
-      for(var k in payload){ if(k !== 'device_id') patchBody[k] = payload[k]; }
-      return fetch(SUPABASE_URL + '/rest/v1/rsvp_responses?device_id=eq.' + encodeURIComponent(payload.device_id), {
-        method: 'PATCH', headers: sbHeaders, body: JSON.stringify(patchBody)
-      });
-    }
-
-    doInsert().then(function(res){
-      if(res.status === 409){ return doUpdate(); }
-      return res;
+    // ทุกครั้งที่ส่ง/แก้ไข RSVP จะ insert เป็นแถวใหม่เสมอ (แท็กด้วย device_id เดิม)
+    // หน้า Dashboard จะโชว์เฉพาะแถวล่าสุดของแต่ละคนให้เอง — ไม่ต้องใช้ UPDATE เลย
+    fetch(SUPABASE_URL + '/rest/v1/rsvp_responses', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
     }).then(function(res){
       submitBtn.disabled = false;
       if(res.ok){

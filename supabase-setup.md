@@ -2,7 +2,7 @@
 
 > **สถานะ: ตั้งค่าเสร็จแล้ว ✅** โปรเจกต์จริงที่ใช้งานอยู่คือ `wedding-rsvp-v2` (`https://rusyltzeomupisfdhtvr.supabase.co`) เชื่อมเข้ากับ `index.html` และ `dashboard.html` เรียบร้อยแล้ว ทดสอบส่ง/แก้ไข RSVP จริงผ่านแล้ว เอกสารนี้เก็บไว้อ้างอิง เผื่อวันหลังต้องสร้างโปรเจกต์ใหม่หรือมีปัญหาต้องแก้ไข
 
-ระบบ RSVP ใช้ฐานข้อมูลของเราเอง (Supabase — Postgres ฟรี) ข้อดีคือ **แก้ไขคำตอบเดิมได้จริง** (ไม่สร้างแถวซ้ำเหมือน Google Sheet) และมีหน้า Dashboard ให้ดูผลได้สวยๆ
+ระบบ RSVP ใช้ฐานข้อมูลของเราเอง (Supabase — Postgres ฟรี) แขกกรอกคำตอบได้ และถ้าแก้ไขคำตอบเดิมก็ทำได้จริง (ดูกลไกด้านล่าง) พร้อมหน้า Dashboard ให้คู่บ่าวสาวดูผลได้สวยๆ
 
 ## ขั้นตอนตั้งค่า (ถ้าต้องทำใหม่)
 
@@ -17,7 +17,7 @@ SQL Editor → New query → วางทั้งหมดนี้แล้ว
 ```sql
 create table rsvp_responses (
   id uuid primary key default gen_random_uuid(),
-  device_id text unique not null,
+  device_id text not null,
   name text not null,
   attend text not null,
   guests int not null default 1,
@@ -28,16 +28,11 @@ create table rsvp_responses (
 
 alter table rsvp_responses enable row level security;
 
-grant select, insert, update on rsvp_responses to anon;
+grant insert on rsvp_responses to public;
 grant select on rsvp_responses to authenticated;
 
 create policy "anyone can insert" on rsvp_responses
   for insert to public
-  with check (true);
-
-create policy "anon can update" on rsvp_responses
-  for update to anon
-  using (true)
   with check (true);
 
 create policy "authenticated can read all" on rsvp_responses
@@ -45,7 +40,7 @@ create policy "authenticated can read all" on rsvp_responses
   using (true);
 ```
 
-**แขกทั่วไป (ไม่ล็อกอิน) ส่ง/แก้ไขคำตอบของตัวเองได้ แต่อ่านคำตอบของคนอื่นไม่ได้เลย** มีแค่คุณ (ที่ล็อกอินแล้ว) เท่านั้นที่ดูรายชื่อทั้งหมดได้ผ่านหน้า Dashboard
+**แขกทั่วไป (ไม่ล็อกอิน) ส่งคำตอบได้ แต่อ่านคำตอบของคนอื่นไม่ได้เลย** มีแค่คุณ (ที่ล็อกอินแล้ว) เท่านั้นที่ดูรายชื่อทั้งหมดได้ผ่านหน้า Dashboard — สังเกตว่า `device_id` **ไม่ใส่ `unique`** เพราะสถาปัตยกรรมนี้ให้ทุกครั้งที่ส่ง/แก้ไข RSVP เป็นการเพิ่มแถวใหม่เสมอ (ดูหัวข้อถัดไป)
 
 ### 3. สร้างบัญชีล็อกอินสำหรับหน้า Dashboard
 **Authentication** → **Users** → **Add user** → **Create new user** → ใส่อีเมล/รหัสผ่าน → ติ๊ก **Auto Confirm User** → Create
@@ -59,12 +54,15 @@ Project URL: https://xxxxxxxxxxxx.supabase.co
 publishable key: sb_publishable_xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-## หมายเหตุทางเทคนิค (เจอตอน debug จริง เก็บไว้กันงงซ้ำ)
+## กลไก "แก้ไขคำตอบเดิมได้" ทำงานยังไง
 
-- **ต้องใช้คีย์จากแท็บ "Publishable and secret API keys" เท่านั้น** ไม่ใช่แท็บ "Legacy anon, service_role API keys" — โปรเจกต์ที่เพิ่งสร้างใหม่บางทีคีย์ legacy จะผูกกับ JWT signing key คนละตัวกับที่ระบบใช้งานจริง ทำให้ยืนยันตัวตนไม่ผ่านแบบเงียบๆ (error จะหน้าตาเหมือน RLS ผิดพลาด ทั้งที่จริงเป็นเรื่องคีย์)
-- **ห้ามส่ง RSVP ด้วย `Prefer: return=representation` หรือ upsert ผ่าน `on_conflict`** — เพราะ anon ไม่มีสิทธิ์ SELECT (กันไว้ไม่ให้แขกอ่านข้อมูลคนอื่น) การขอให้ Postgres "อ่านค่ากลับมา" หลัง insert/upsert จะชนกับ RLS ทันที แม้ policy insert จะถูกต้องก็ตาม — โค้ดที่ใช้งานจริงตอนนี้แก้โดย: **ยิง insert ธรรมดาก่อน (`Prefer: return=minimal`) ถ้าเจอ device_id ซ้ำ (HTTP 409) ค่อยยิง PATCH แก้ไขแถวเดิมแทน** (ดูใน `index.html` ฟังก์ชัน `doInsert`/`doUpdate`) วิธีนี้ไม่ต้องพึ่ง SELECT เลย ปลอดภัยครบ
+ตอนแรกออกแบบให้ใช้ UPDATE (upsert) แก้ไขแถวเดิมตรงๆ แต่เจอข้อจำกัดของโปรเจกต์นี้ที่ทำให้ UPDATE ผ่าน API ใช้งานไม่ได้แม้ policy/สิทธิ์จะถูกต้องทุกอย่าง (สาเหตุยังไม่ชัดเจน 100% แต่ INSERT ใช้งานได้เสถียรมาก) จึงเปลี่ยนสถาปัตยกรรมเป็น **append-only**:
+
+- ทุกครั้งที่กด "ส่งคำตอบ" หรือ "อัปเดตคำตอบ" ฝั่งเว็บจะ **insert แถวใหม่เสมอ** พร้อมแท็ก `device_id` เดิม (เก็บไว้ใน localStorage ของเบราว์เซอร์แขกแต่ละคน)
+- หน้า **Dashboard** (`dashboard.html`) ดึงข้อมูลทั้งหมดมา แล้ว**กรองให้เหลือแค่แถวล่าสุด (`updated_at` มากสุด) ของแต่ละ `device_id`** ก่อนแสดงผลและคำนวณสรุปยอด — คู่บ่าวสาวจึงเห็นแค่คำตอบล่าสุดของแขกแต่ละคน ไม่งงกับแถวซ้ำ
+- ถ้าอยากดูประวัติการแก้ไขทั้งหมดของใครสักคน เปิดดูตรงๆ ได้ที่ **Table Editor** → `rsvp_responses` → กรองด้วย `device_id`
 
 ## หลังตั้งค่าเสร็จ
 - แขกกรอก RSVP ที่หน้าเว็บหลักตามปกติ ข้อมูลจะเข้า Supabase (ดูได้ใน **Table Editor** → `rsvp_responses` ก็ได้ ถ้าไม่อยากรอหน้า Dashboard)
 - เข้าหน้าดูผลสวยๆ ได้ที่ `<โดเมนเว็บของคุณ>/dashboard.html` ล็อกอินด้วยอีเมล/รหัสผ่านจากข้อ 3
-- มีแถวทดสอบ (`minimal-check-001`, `e2e-final-check-001`) ค้างอยู่ในตารางจากตอน debug — ลบทิ้งได้เลยผ่าน **Table Editor** (ติ๊กแถว → ลบ) ก่อนเริ่มใช้งานจริงกับแขก
+- มีแถวทดสอบค้างอยู่จากตอน debug (`simpletest001`, `minimal-check-001`, `e2e-final-check-001`, `final-append-check-001`) — ลบทิ้งได้ทั้งหมดผ่าน **Table Editor** (เลือกทุกแถว → Delete) ก่อนเริ่มใช้งานจริงกับแขก

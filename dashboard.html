@@ -246,9 +246,22 @@
       return res.json();
     }).then(function(rows){
       if(!rows) return;
-      allRows = rows;
-      renderStats(rows);
-      renderTable(rows);
+      // ทุกครั้งที่แขกแก้ไข RSVP จะเพิ่มแถวใหม่เสมอ (ไม่มี UPDATE) —
+      // ที่นี่จึงกรองให้เหลือแค่คำตอบล่าสุดของแต่ละคน (ตาม device_id) มาแสดง
+      var latestByDevice = {};
+      var order = [];
+      rows.forEach(function(r){
+        if(!(r.device_id in latestByDevice)) order.push(r.device_id);
+        var prev = latestByDevice[r.device_id];
+        if(!prev || new Date(r.updated_at) > new Date(prev.updated_at)){
+          latestByDevice[r.device_id] = r;
+        }
+      });
+      var latestRows = order.map(function(id){ return latestByDevice[id]; })
+        .sort(function(a,b){ return new Date(b.updated_at) - new Date(a.updated_at); });
+      allRows = latestRows;
+      renderStats(latestRows);
+      renderTable(latestRows);
     }).catch(function(err){
       document.getElementById('loadingState').textContent = 'โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชหน้านี้อีกครั้ง';
       console.error(err);

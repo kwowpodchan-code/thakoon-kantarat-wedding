@@ -7,7 +7,7 @@
 - [x] **QR PromptPay** — ใช้ไฟล์จริง `image/promptpay-qr.jpg` แล้วใน section `#gift`
 - [x] **RSVP → Supabase** — เชื่อมเสร็จและทดสอบส่ง/แก้ไขจริงผ่านแล้ว (ดูรายละเอียดที่ `supabase-setup.md`)
 - [x] **Dashboard สำหรับดูผล RSVP** — อยู่ที่ `dashboard.html` (เช่น `<โดเมนเว็บ>/dashboard.html`) ล็อกอินด้วยบัญชีที่ตั้งไว้ใน Supabase Authentication ได้แล้ว
-- [ ] **ลบแถวทดสอบใน Supabase** — มีแถว `minimal-check-001` และ `e2e-final-check-001` ค้างจากตอน debug ลบผ่าน Table Editor ก่อนเริ่มใช้งานจริง
+- [ ] **ลบแถวทดสอบใน Supabase** — มีแถวทดสอบหลายอันค้างจากตอน debug (`simpletest001`, `minimal-check-001`, `e2e-final-check-001`, `final-append-check-001`) ลบทั้งหมดผ่าน Table Editor (เลือกทุกแถว → Delete) ก่อนเริ่มใช้งานจริง
 - [x] **โดเมน/ลิงก์จริง** — deploy ขึ้น Netlify แล้ว เปิดสาธารณะได้: https://loquacious-gumption-47cd15.netlify.app (ยังเป็นลิงก์สุ่ม — ถ้าต้องการโดเมนของตัวเอง ทำตาม `DEPLOY.md` ข้อ 5-6 ต่อได้)
 - [x] **ไฟล์เพลงประกอบ (mp3)** — ใช้ไฟล์ "คืนนี้ขอหอม B5.mp3" ที่คุณส่งมาแล้ว วางไว้ที่ `music/song.mp3`
 - [ ] **ทดสอบแชร์ลิงก์ใน LINE/Facebook** — ดูว่าพรีวิว (ชื่อ, คำอธิบาย, รูป) ขึ้นถูกต้องสวยงาม
