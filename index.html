@@ -388,10 +388,15 @@
     padding:24px; text-align:center; box-shadow:var(--shadow);
   }
   .map-frame{
-    width:100%; height:280px; border:1px solid var(--line); border-radius:12px;
+    position:relative; width:100%; height:280px; border:1px solid var(--line); border-radius:12px;
     overflow:hidden; margin-bottom:18px; filter:saturate(.85) sepia(.08);
   }
   .map-frame iframe{ width:100%; height:100%; border:0; display:block; }
+  .map-fallback{
+    display:none; position:absolute; inset:0; background:var(--surface);
+    align-items:center; justify-content:center; text-align:center;
+    padding:20px; font-size:.9rem; color:var(--ink-muted);
+  }
   .map-card .venue{ font-size:1.3rem; margin:10px 0 4px; }
   .map-card .addr{ color:var(--ink-muted); font-size:.92rem; margin-bottom:20px; }
   .map-btn{
@@ -679,7 +684,8 @@
     </div>
     <div class="map-card">
       <div class="map-frame">
-        <iframe src="https://www.google.com/maps?q=19.9188944,99.8320069&z=16&output=embed" title="แผนที่ TRIPLE C campsite &amp; café" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=99.8260069%2C19.9148944%2C99.8380069%2C19.9228944&amp;layer=mapnik&amp;marker=19.9188944%2C99.8320069" title="แผนที่ TRIPLE C campsite &amp; café" loading="lazy" referrerpolicy="no-referrer-when-downgrade" onerror="this.style.display='none'; document.getElementById('mapFallback').style.display='flex';"></iframe>
+        <div id="mapFallback" class="map-fallback">ไม่สามารถแสดงแผนที่ได้ในขณะนี้ — กดปุ่มด้านล่างเพื่อเปิดแผนที่นำทางแทน</div>
       </div>
       <svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 22s7-7.4 7-12.6A7 7 0 1 0 5 9.4C5 14.6 12 22 12 22z" fill="none" stroke="var(--gold)" stroke-width="1.5"/><circle cx="12" cy="9" r="2.6" fill="var(--gold)"/></svg>
       <div class="venue">TRIPLE C campsite &amp; café</div>
