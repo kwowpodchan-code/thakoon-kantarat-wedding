@@ -1,16 +1,18 @@
 # วิธีตั้งค่า Supabase สำหรับ RSVP + Dashboard
 
-ระบบ RSVP เปลี่ยนจาก Google Form มาเป็นฐานข้อมูลของเราเองแล้ว (Supabase — ฐานข้อมูล Postgres ฟรี) ข้อดีคือ **แก้ไขคำตอบเดิมได้จริง** (ไม่สร้างแถวซ้ำเหมือน Google Sheet) และมีหน้า Dashboard ให้ดูผลได้สวยๆ ทำตาม 5 ขั้นตอนนี้ครั้งเดียว
+> **สถานะ: ตั้งค่าเสร็จแล้ว ✅** โปรเจกต์จริงที่ใช้งานอยู่คือ `wedding-rsvp-v2` (`https://rusyltzeomupisfdhtvr.supabase.co`) เชื่อมเข้ากับ `index.html` และ `dashboard.html` เรียบร้อยแล้ว ทดสอบส่ง/แก้ไข RSVP จริงผ่านแล้ว เอกสารนี้เก็บไว้อ้างอิง เผื่อวันหลังต้องสร้างโปรเจกต์ใหม่หรือมีปัญหาต้องแก้ไข
 
-## 1. สมัครบัญชีและสร้างโปรเจกต์
-1. ไปที่ https://supabase.com → กด "Start your project" → สมัครด้วย GitHub หรืออีเมลก็ได้ (ฟรี ไม่ต้องผูกบัตร)
-2. กด "New project" ตั้งชื่ออะไรก็ได้ เช่น `wedding-rsvp`
-3. ตั้งรหัสผ่านฐานข้อมูล (Database Password) — จดเก็บไว้ (ไม่จำเป็นต้องใช้ในขั้นตอนต่อไป แต่เผื่อไว้)
-4. เลือก Region ใกล้ไทยที่สุด (เช่น Singapore) แล้วกด "Create new project" รอสักครู่ให้สร้างเสร็จ (~1-2 นาที)
+ระบบ RSVP ใช้ฐานข้อมูลของเราเอง (Supabase — Postgres ฟรี) ข้อดีคือ **แก้ไขคำตอบเดิมได้จริง** (ไม่สร้างแถวซ้ำเหมือน Google Sheet) และมีหน้า Dashboard ให้ดูผลได้สวยๆ
 
-## 2. สร้างตารางเก็บข้อมูล RSVP
-1. ในเมนูซ้ายของโปรเจกต์ กด **"SQL Editor"**
-2. กด "New query" แล้ววางโค้ดนี้ทั้งหมด:
+## ขั้นตอนตั้งค่า (ถ้าต้องทำใหม่)
+
+### 1. สมัครบัญชีและสร้างโปรเจกต์
+1. ไปที่ https://supabase.com → "Start your project" → สมัครฟรี
+2. "New project" ตั้งชื่อ → ตั้งรหัสผ่านฐานข้อมูล → เลือก Region ใกล้ไทย (Singapore)
+3. **ตอนสร้างโปรเจกต์**: ปิดตัวเลือก **"Automatically expose new tables"** และ **"Enable automatic RLS"** (เราตั้งค่าเองผ่าน SQL แบบชัดเจนกว่า) ส่วน **"Enable Data API"** เปิดไว้ตามเดิม
+
+### 2. สร้างตารางเก็บข้อมูล RSVP
+SQL Editor → New query → วางทั้งหมดนี้แล้ว Run:
 
 ```sql
 create table rsvp_responses (
@@ -26,8 +28,11 @@ create table rsvp_responses (
 
 alter table rsvp_responses enable row level security;
 
-create policy "anon can insert" on rsvp_responses
-  for insert to anon
+grant select, insert, update on rsvp_responses to anon;
+grant select on rsvp_responses to authenticated;
+
+create policy "anyone can insert" on rsvp_responses
+  for insert to public
   with check (true);
 
 create policy "anon can update" on rsvp_responses
@@ -40,29 +45,26 @@ create policy "authenticated can read all" on rsvp_responses
   using (true);
 ```
 
-3. กดปุ่ม **"Run"** (หรือ Ctrl+Enter) ควรขึ้นข้อความ "Success. No rows returned"
+**แขกทั่วไป (ไม่ล็อกอิน) ส่ง/แก้ไขคำตอบของตัวเองได้ แต่อ่านคำตอบของคนอื่นไม่ได้เลย** มีแค่คุณ (ที่ล็อกอินแล้ว) เท่านั้นที่ดูรายชื่อทั้งหมดได้ผ่านหน้า Dashboard
 
-นี่คือส่วนสำคัญที่ทำให้ระบบปลอดภัย: **แขกทั่วไป (ไม่ล็อกอิน) ส่ง/แก้ไขคำตอบของตัวเองได้ แต่อ่านคำตอบของคนอื่นไม่ได้เลย** มีแค่คุณ (ที่ล็อกอินแล้ว) เท่านั้นที่ดูรายชื่อทั้งหมดได้ผ่านหน้า Dashboard
+### 3. สร้างบัญชีล็อกอินสำหรับหน้า Dashboard
+**Authentication** → **Users** → **Add user** → **Create new user** → ใส่อีเมล/รหัสผ่าน → ติ๊ก **Auto Confirm User** → Create
 
-## 3. สร้างบัญชีล็อกอินสำหรับหน้า Dashboard
-1. เมนูซ้าย กด **"Authentication"** → แท็บ **"Users"**
-2. กด **"Add user"** → **"Create new user"**
-3. ใส่อีเมลและรหัสผ่านที่คุณ (คู่บ่าวสาว) จะใช้ล็อกอินเข้าหน้าดูผล RSVP — จดจำไว้ให้ดี
-4. ติ๊ก **"Auto Confirm User"** แล้วกด Create
+### 4. หา Project URL และคีย์
+**Project Settings** → **API Keys** → แท็บ **"Publishable and secret API keys"** (ไม่ใช่แท็บ Legacy) → copy **Project URL** และ **publishable key** (`sb_publishable_...`)
 
-## 4. หา Project URL และ anon key
-1. เมนูซ้าย กด **"Project Settings"** (ไอคอนเฟือง) → **"API"**
-2. คัดลอกค่า **"Project URL"** (หน้าตาประมาณ `https://xxxxxxxxxxxx.supabase.co`)
-3. คัดลอกค่า **"anon public"** key (สตริงยาวๆ ใต้หัวข้อ Project API keys) — ค่านี้เอาไปฝังในโค้ดเว็บได้อย่างปลอดภัย เพราะถูกจำกัดสิทธิ์ด้วย policy ที่ตั้งไว้ในข้อ 2 แล้ว
-
-## 5. ส่งค่าทั้งสองมาให้ผม
-ส่งข้อความมาในรูปแบบนี้:
+### 5. ส่งค่ามาให้ผมใส่ในโค้ด
 ```
 Project URL: https://xxxxxxxxxxxx.supabase.co
-anon key: eyJxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+publishable key: sb_publishable_xxxxxxxxxxxxxxxxxxxxxxxx
 ```
-ผมจะเอาไปใส่ในโค้ด `index.html` และ `dashboard.html` ให้ทันที แล้วทดสอบส่ง RSVP จริงให้ดูจนกว่าจะมั่นใจว่าทำงานถูกต้อง
+
+## หมายเหตุทางเทคนิค (เจอตอน debug จริง เก็บไว้กันงงซ้ำ)
+
+- **ต้องใช้คีย์จากแท็บ "Publishable and secret API keys" เท่านั้น** ไม่ใช่แท็บ "Legacy anon, service_role API keys" — โปรเจกต์ที่เพิ่งสร้างใหม่บางทีคีย์ legacy จะผูกกับ JWT signing key คนละตัวกับที่ระบบใช้งานจริง ทำให้ยืนยันตัวตนไม่ผ่านแบบเงียบๆ (error จะหน้าตาเหมือน RLS ผิดพลาด ทั้งที่จริงเป็นเรื่องคีย์)
+- **ห้ามส่ง RSVP ด้วย `Prefer: return=representation` หรือ upsert ผ่าน `on_conflict`** — เพราะ anon ไม่มีสิทธิ์ SELECT (กันไว้ไม่ให้แขกอ่านข้อมูลคนอื่น) การขอให้ Postgres "อ่านค่ากลับมา" หลัง insert/upsert จะชนกับ RLS ทันที แม้ policy insert จะถูกต้องก็ตาม — โค้ดที่ใช้งานจริงตอนนี้แก้โดย: **ยิง insert ธรรมดาก่อน (`Prefer: return=minimal`) ถ้าเจอ device_id ซ้ำ (HTTP 409) ค่อยยิง PATCH แก้ไขแถวเดิมแทน** (ดูใน `index.html` ฟังก์ชัน `doInsert`/`doUpdate`) วิธีนี้ไม่ต้องพึ่ง SELECT เลย ปลอดภัยครบ
 
 ## หลังตั้งค่าเสร็จ
-- แขกกรอก RSVP ที่หน้าเว็บหลักตามปกติ ข้อมูลจะเข้า Supabase (ดูได้ในเมนู "Table Editor" → `rsvp_responses` ก็ได้เช่นกัน ถ้าไม่อยากรอหน้า Dashboard)
+- แขกกรอก RSVP ที่หน้าเว็บหลักตามปกติ ข้อมูลจะเข้า Supabase (ดูได้ใน **Table Editor** → `rsvp_responses` ก็ได้ ถ้าไม่อยากรอหน้า Dashboard)
 - เข้าหน้าดูผลสวยๆ ได้ที่ `<โดเมนเว็บของคุณ>/dashboard.html` ล็อกอินด้วยอีเมล/รหัสผ่านจากข้อ 3
+- มีแถวทดสอบ (`minimal-check-001`, `e2e-final-check-001`) ค้างอยู่ในตารางจากตอน debug — ลบทิ้งได้เลยผ่าน **Table Editor** (ติ๊กแถว → ลบ) ก่อนเริ่มใช้งานจริงกับแขก

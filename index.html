@@ -832,8 +832,8 @@
 (function(){
   // --- ตั้งค่าการส่ง RSVP เข้า Supabase ---
   // ดูวิธีหาค่าเหล่านี้ทั้งหมดได้ใน supabase-setup.md (ต้องแทนที่ก่อนเปิดใช้งานจริง)
-  var SUPABASE_URL = "PASTE_YOUR_SUPABASE_URL_HERE";
-  var SUPABASE_ANON_KEY = "PASTE_YOUR_SUPABASE_ANON_KEY_HERE";
+  var SUPABASE_URL = "https://rusyltzeomupisfdhtvr.supabase.co";
+  var SUPABASE_ANON_KEY = "sb_publishable_5FtBFDxjc81xwhluaqGbUw_zffxl2wR";
   var rsvpConfigured = SUPABASE_URL.indexOf("PASTE_") !== 0;
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1038,15 +1038,32 @@
     }
 
     submitBtn.disabled = true;
-    fetch(SUPABASE_URL + '/rest/v1/rsvp_responses?on_conflict=device_id', {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates,return=minimal'
-      },
-      body: JSON.stringify(payload)
+    var sbHeaders = {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    };
+
+    // Postgres RLS ไม่อนุญาตให้ upsert (on_conflict) แบบ single request ได้ตรงๆ
+    // ในเมื่อ anon ไม่มีสิทธิ์ SELECT (กันแขกอ่านข้อมูลคนอื่น) จึงต้อง insert ก่อน
+    // แล้วถ้าเจอ device_id ซ้ำ (409) ค่อย PATCH แก้ไขแถวเดิมแทน
+    function doInsert(){
+      return fetch(SUPABASE_URL + '/rest/v1/rsvp_responses', {
+        method: 'POST', headers: sbHeaders, body: JSON.stringify(payload)
+      });
+    }
+    function doUpdate(){
+      var patchBody = {};
+      for(var k in payload){ if(k !== 'device_id') patchBody[k] = payload[k]; }
+      return fetch(SUPABASE_URL + '/rest/v1/rsvp_responses?device_id=eq.' + encodeURIComponent(payload.device_id), {
+        method: 'PATCH', headers: sbHeaders, body: JSON.stringify(patchBody)
+      });
+    }
+
+    doInsert().then(function(res){
+      if(res.status === 409){ return doUpdate(); }
+      return res;
     }).then(function(res){
       submitBtn.disabled = false;
       if(res.ok){

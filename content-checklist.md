@@ -5,8 +5,9 @@
 - [ ] **กำหนดการงาน (Timeline)** — แก้เวลาใน section `#timeline` ของ `index.html` (ตอนนี้ใส่ตัวอย่างไว้ที่ 09:00 / 11:30 / 17:00 / 18:30)
 - [x] **รูปภาพแกลเลอรี่** — ใช้รูปจริงจาก `image/web/gallery-1.jpg` ถึง `gallery-6.jpg` แล้ว (ย่อ/บีบอัดจากรูปต้นฉบับใน `image/`) หากอยากเปลี่ยนรูป แก้ path ใน section `#gallery` ได้เลย
 - [x] **QR PromptPay** — ใช้ไฟล์จริง `image/promptpay-qr.jpg` แล้วใน section `#gift`
-- [ ] **RSVP → Supabase** — เปลี่ยนจาก Google Form มาเป็น Supabase แล้ว (แก้ไขคำตอบเดิมได้จริง + มี Dashboard) โค้ดเชื่อมไว้แล้วแต่ยังรอ Project URL/anon key จริง — ทำตาม `supabase-setup.md` แล้วส่งค่ามาให้ใส่ในโค้ด
-- [ ] **Dashboard สำหรับดูผล RSVP** — อยู่ที่ `dashboard.html` (เช่น `<โดเมนเว็บ>/dashboard.html`) ต้องรอตั้งค่า Supabase (ข้อบนนี้) ให้เสร็จก่อนถึงจะล็อกอินดูข้อมูลได้
+- [x] **RSVP → Supabase** — เชื่อมเสร็จและทดสอบส่ง/แก้ไขจริงผ่านแล้ว (ดูรายละเอียดที่ `supabase-setup.md`)
+- [x] **Dashboard สำหรับดูผล RSVP** — อยู่ที่ `dashboard.html` (เช่น `<โดเมนเว็บ>/dashboard.html`) ล็อกอินด้วยบัญชีที่ตั้งไว้ใน Supabase Authentication ได้แล้ว
+- [ ] **ลบแถวทดสอบใน Supabase** — มีแถว `minimal-check-001` และ `e2e-final-check-001` ค้างจากตอน debug ลบผ่าน Table Editor ก่อนเริ่มใช้งานจริง
 - [x] **โดเมน/ลิงก์จริง** — deploy ขึ้น Netlify แล้ว เปิดสาธารณะได้: https://loquacious-gumption-47cd15.netlify.app (ยังเป็นลิงก์สุ่ม — ถ้าต้องการโดเมนของตัวเอง ทำตาม `DEPLOY.md` ข้อ 5-6 ต่อได้)
 - [x] **ไฟล์เพลงประกอบ (mp3)** — ใช้ไฟล์ "คืนนี้ขอหอม B5.mp3" ที่คุณส่งมาแล้ว วางไว้ที่ `music/song.mp3`
 - [ ] **ทดสอบแชร์ลิงก์ใน LINE/Facebook** — ดูว่าพรีวิว (ชื่อ, คำอธิบาย, รูป) ขึ้นถูกต้องสวยงาม
