@@ -464,9 +464,19 @@
   .player-volume .ctrl-btn.muted .ic-vol-off{ display:block; }
   .player-volume input[type="range"]{ width:110px; accent-color:var(--gold-strong); cursor:pointer; }
 
-  .qr-card{ margin-top:28px; text-align:center; }
-  .qr-label{ font-size:.85rem; color:var(--ink-muted); margin-bottom:14px; }
-  .qr-img{ max-width:220px; width:100%; display:inline-block; border-radius:14px; border:1px solid var(--line); box-shadow:var(--shadow); }
+  .qr-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:24px;
+    padding:28px 26px; box-shadow:var(--shadow); max-width:340px; margin:0 auto 26px; text-align:center;
+  }
+  .qr-label{ font-size:.85rem; color:var(--ink-muted); margin-bottom:20px; }
+  .qr-frame{
+    display:inline-block; padding:14px; background:#fff; border-radius:18px;
+    border:2px solid var(--gold-strong); box-shadow:var(--shadow); position:relative;
+  }
+  .qr-frame::before{
+    content:''; position:absolute; inset:6px; border:1px solid var(--gold); border-radius:12px; pointer-events:none;
+  }
+  .qr-img{ max-width:200px; width:100%; display:block; border-radius:6px; }
 
   /* ---------- rsvp ---------- */
   .rsvp-card{
@@ -790,6 +800,13 @@
       <span class="tape left"></span><span class="tape right"></span>
       <p>ความสุขของท่านคือของขวัญที่ดีที่สุดสำหรับเราแล้ว</p>
     </div>
+    <div class="qr-card">
+      <div class="qr-label">ร่วมมอบของขวัญผ่านพร้อมเพย์</div>
+      <div class="qr-frame">
+        <img src="image/web/promptpay-qr.jpg" alt="พร้อมเพย์ กันตรัตน์ เพ็งวงศ์" class="qr-img" loading="lazy">
+      </div>
+    </div>
+
     <div class="player-card">
       <div class="player-cover">
         <img src="image/web/music-photo.jpg" alt="กันตรัตน์และฐากูร" loading="lazy">
@@ -822,11 +839,6 @@
         </button>
         <input type="range" id="musicVolume" min="0" max="100" value="70" aria-label="ระดับเสียงเพลง">
       </div>
-    </div>
-
-    <div class="qr-card">
-      <div class="qr-label">หรือร่วมมอบของขวัญผ่านพร้อมเพย์</div>
-      <img src="image/web/promptpay-qr.jpg" alt="พร้อมเพย์ กันตรัตน์ เพ็งวงศ์" class="qr-img" loading="lazy">
     </div>
   </section>
 
