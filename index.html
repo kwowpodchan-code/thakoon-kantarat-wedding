@@ -311,7 +311,12 @@
     color:var(--gold-strong); line-height:1; flex:0 0 auto;
   }
   @media (max-width:560px){
-    #hero .name-split{ flex-direction:column; gap:6px; }
+    #hero .name-split{ flex-direction:column; gap:16px; }
+    /* flex:1 1 200px only makes sense as a column *width* (row layout above) —
+       in column layout it reads as a 200px flex-basis *height*, forcing each
+       name block to a fixed 200px tall box regardless of its real content
+       height. Reset it here so the stacked blocks hug their own text. */
+    #hero .name-col{ flex:0 0 auto; min-width:0; }
     #hero .name-col:first-child, #hero .name-col:last-child{ text-align:center; }
   }
   #hero .invite-formal{
@@ -472,11 +477,47 @@
   .qr-frame{
     display:inline-block; padding:14px; background:#fff; border-radius:18px;
     border:2px solid var(--gold-strong); box-shadow:var(--shadow); position:relative;
+    appearance:none; -webkit-appearance:none; font:inherit; cursor:pointer;
+    transition:filter .15s ease, transform .15s ease;
   }
+  .qr-frame:hover{ filter:brightness(1.03); }
+  .qr-frame:active{ transform:scale(.97); }
   .qr-frame::before{
     content:''; position:absolute; inset:6px; border:1px solid var(--gold); border-radius:12px; pointer-events:none;
   }
   .qr-img{ max-width:200px; width:100%; display:block; border-radius:6px; }
+  .qr-hint{ font-size:.72rem; color:var(--ink-muted); margin-top:14px; }
+
+  .qr-modal{
+    position:fixed; inset:0; z-index:200; background:rgba(20,16,10,.82);
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  .qr-modal.show{ display:flex; }
+  .qr-modal-inner{
+    position:relative; background:var(--surface); border-radius:22px; padding:30px 26px 26px;
+    max-width:360px; width:100%; text-align:center; box-shadow:var(--shadow);
+  }
+  .qr-modal-close{
+    position:absolute; top:12px; right:12px; width:36px; height:36px; border-radius:50%;
+    background:var(--bg); border:1px solid var(--line); color:var(--ink); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .qr-modal-close svg{ width:18px; height:18px; }
+  .qr-modal-frame{
+    display:inline-block; padding:14px; background:#fff; border-radius:18px;
+    border:2px solid var(--gold-strong); box-shadow:var(--shadow); position:relative; margin-top:10px;
+  }
+  .qr-modal-frame::before{
+    content:''; position:absolute; inset:6px; border:1px solid var(--gold); border-radius:12px; pointer-events:none;
+  }
+  .qr-modal-frame img{ max-width:260px; width:100%; display:block; border-radius:6px; }
+  .qr-download{
+    display:inline-flex; align-items:center; gap:8px; margin-top:22px; padding:12px 24px;
+    background:var(--gold-strong); color:var(--navy-ink); border-radius:999px; font-size:.9rem;
+    font-weight:600; text-decoration:none; box-shadow:var(--shadow); transition:filter .15s ease;
+  }
+  .qr-download:hover{ filter:brightness(1.06); }
+  .qr-download svg{ width:16px; height:16px; }
 
   /* ---------- rsvp ---------- */
   .rsvp-card{
@@ -802,9 +843,10 @@
     </div>
     <div class="qr-card">
       <div class="qr-label">ร่วมมอบของขวัญผ่านพร้อมเพย์</div>
-      <div class="qr-frame">
+      <button type="button" class="qr-frame" id="qrOpenBtn" aria-label="แตะเพื่อดู QR code ขนาดใหญ่และดาวน์โหลด">
         <img src="image/web/promptpay-qr.jpg" alt="พร้อมเพย์ กันตรัตน์ เพ็งวงศ์" class="qr-img" loading="lazy">
-      </div>
+      </button>
+      <div class="qr-hint">แตะที่ QR เพื่อขยาย/ดาวน์โหลด</div>
     </div>
 
     <div class="player-card">
@@ -924,6 +966,22 @@
   </footer>
 
 </main>
+
+<div class="qr-modal" id="qrModal" role="dialog" aria-modal="true" aria-label="QR Code พร้อมเพย์ขนาดใหญ่">
+  <div class="qr-modal-inner">
+    <button type="button" class="qr-modal-close" id="qrModalClose" aria-label="ปิด">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="qr-label">ร่วมมอบของขวัญผ่านพร้อมเพย์</div>
+    <div class="qr-modal-frame">
+      <img src="image/web/promptpay-qr.jpg" alt="พร้อมเพย์ กันตรัตน์ เพ็งวงศ์">
+    </div>
+    <a class="qr-download" href="image/web/promptpay-qr.jpg" download="promptpay-kantarat.jpg">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.59l3.3-3.3 1.4 1.42L12 17.4l-4.7-4.7 1.4-1.42 3.3 3.3V3h2zM5 19h14v2H5z"/></svg>
+      ดาวน์โหลด QR Code
+    </a>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -1046,6 +1104,27 @@
   gate.addEventListener('click', openGate);
   gate.addEventListener('keydown', function(e){
     if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openGate(); }
+  });
+
+  // --- QR code lightbox (tap to enlarge / download) ---
+  var qrOpenBtn = document.getElementById('qrOpenBtn');
+  var qrModal = document.getElementById('qrModal');
+  var qrModalClose = document.getElementById('qrModalClose');
+  function openQrModal(){
+    qrModal.classList.add('show');
+    document.body.classList.add('gate-lock');
+  }
+  function closeQrModal(){
+    qrModal.classList.remove('show');
+    document.body.classList.remove('gate-lock');
+  }
+  qrOpenBtn.addEventListener('click', openQrModal);
+  qrModalClose.addEventListener('click', closeQrModal);
+  qrModal.addEventListener('click', function(e){
+    if(e.target === qrModal) closeQrModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && qrModal.classList.contains('show')) closeQrModal();
   });
 
   var bride = document.getElementById('brideFig');
