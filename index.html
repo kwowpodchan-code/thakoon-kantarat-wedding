@@ -284,15 +284,28 @@
   /* ---------- hero ---------- */
   #hero{ padding-top:clamp(40px,8vw,72px); text-align:center; }
   #hero .monogram{ font-family:var(--font-heading); font-size:3rem; color:var(--gold); margin-bottom:2px; }
-  #hero h1{
-    font-size:clamp(2.6rem,8vw,4.2rem);
-    line-height:1.1;
+  #hero h1{ margin:0; }
+  #hero .name-split{
+    display:flex; align-items:center; justify-content:center;
+    gap:clamp(14px,4vw,40px); flex-wrap:wrap;
   }
-  #hero h1 .en{
-    display:block; font-family:var(--font-display); font-weight:400;
-    font-size:.55em; letter-spacing:.02em; color:var(--gold-strong); margin-top:10px;
+  #hero .name-col{ flex:1 1 200px; min-width:150px; }
+  #hero .name-col:first-child{ text-align:right; }
+  #hero .name-col:last-child{ text-align:left; }
+  #hero .name-en{
+    font-family:var(--font-heading); font-weight:600;
+    font-size:clamp(1.9rem,7vw,3.3rem); line-height:1.05; color:var(--gold);
   }
-  #hero .amp{ display:none; }
+  #hero .name-en-last{ display:block; font-size:.48em; font-weight:500; margin-top:4px; }
+  #hero .name-th{ margin-top:10px; font-size:clamp(.85rem,2vw,1.05rem); color:var(--ink); }
+  #hero .name-amp{
+    font-family:var(--font-display); font-size:clamp(2.4rem,9vw,4.2rem);
+    color:var(--gold-strong); line-height:1; flex:0 0 auto;
+  }
+  @media (max-width:560px){
+    #hero .name-split{ flex-direction:column; gap:6px; }
+    #hero .name-col:first-child, #hero .name-col:last-child{ text-align:center; }
+  }
   #hero .invite-formal{
     font-size:.92rem; color:var(--ink-muted); max-width:38ch; margin:0 auto 18px; line-height:1.7;
   }
@@ -418,18 +431,30 @@
   .torn-note .tape.left{ top:-12px; left:14px; transform:rotate(-9deg); }
   .torn-note .tape.right{ top:-12px; right:14px; transform:rotate(7deg); }
   .torn-note p{ font-family:var(--font-heading); font-size:1.3rem; font-weight:600; color:var(--ink); line-height:1.4; }
-  .gift-card{
+  .music-card{
     background:var(--surface); border:1px solid var(--line); border-radius:18px;
-    padding:34px; text-align:center; box-shadow:var(--shadow);
+    padding:24px 26px; box-shadow:var(--shadow);
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap; justify-content:center;
   }
-  .qr-box{
-    width:200px; margin:0 auto 16px; border:1px solid var(--line);
-    border-radius:12px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px;
-    color:var(--ink-muted); font-size:.72rem; padding:10px; text-align:center; overflow:hidden;
-    box-shadow:var(--shadow); background:#fff;
+  .music-play{
+    width:52px; height:52px; border-radius:50%; border:none; cursor:pointer; flex-shrink:0;
+    background:var(--gold-strong); color:var(--navy-ink); display:flex; align-items:center; justify-content:center;
+    box-shadow:var(--shadow); transition:filter .15s ease, transform .15s ease;
   }
-  .qr-box img{ width:100%; height:auto; display:block; border-radius:6px; }
-  .gift-card p{ color:var(--ink-muted); font-size:.92rem; }
+  .music-play:hover{ filter:brightness(1.08); }
+  .music-play:active{ transform:scale(.96); }
+  .music-play svg{ width:22px; height:22px; }
+  .music-play .ic-pause{ display:none; }
+  .music-play.playing .ic-play{ display:none; }
+  .music-play.playing .ic-pause{ display:block; }
+  .music-info{ text-align:left; min-width:140px; }
+  .music-title{ font-family:var(--font-heading); font-size:1.1rem; color:var(--ink); }
+  .music-sub{ font-size:.78rem; color:var(--ink-muted); margin-top:2px; }
+  .music-volume{ display:flex; align-items:center; gap:8px; flex:1 1 140px; min-width:120px; color:var(--gold-strong); }
+  .music-volume svg{ width:18px; height:18px; flex-shrink:0; }
+  .music-volume input[type="range"]{
+    flex:1; accent-color:var(--gold-strong); cursor:pointer;
+  }
 
   /* ---------- rsvp ---------- */
   .rsvp-card{
@@ -637,9 +662,16 @@
 
   <section id="hero">
     <p class="invite-formal">มีความยินดีขอเรียนเชิญเพื่อเป็นเกียรติในงานเลี้ยงฉลอง<br>เนื่องในพิธีมงคลสมรส ระหว่าง</p>
-    <h1>
-      นางสาวกันตรัตน์ เพ็งวงศ์ &amp; นายฐากูร ชาญชวลิต
-      <span class="en">Kantarat Phengwong &amp; Thakoon Chanchawalit</span>
+    <h1 class="name-split">
+      <div class="name-col">
+        <div class="name-en">Kantarat<span class="name-en-last">Phengwong</span></div>
+        <div class="name-th">นางสาวกันตรัตน์ เพ็งวงศ์</div>
+      </div>
+      <div class="name-amp">&amp;</div>
+      <div class="name-col">
+        <div class="name-en">Thakoon<span class="name-en-last">Chanchawalit</span></div>
+        <div class="name-th">นายฐากูร ชาญชวลิต</div>
+      </div>
     </h1>
     <p class="date">8 OCTOBER 2026</p>
     <p class="invite-line">ด้วยความยินดียิ่ง เราขอเชิญท่านมาร่วมเป็นสักขีพยานและร่วมยินดีไปกับเราในวันสำคัญที่สุดวันหนึ่งของชีวิต</p>
@@ -748,11 +780,19 @@
       <span class="tape left"></span><span class="tape right"></span>
       <p>ความสุขของท่านคือของขวัญที่ดีที่สุดสำหรับเราแล้ว</p>
     </div>
-    <div class="gift-card">
-      <div class="qr-box">
-        <img src="image/promptpay-qr.jpg" alt="QR PromptPay สำหรับร่วมอวยพร">
+    <div class="music-card">
+      <button type="button" id="musicPlayBtn" class="music-play" aria-label="เล่น/หยุดเพลง">
+        <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+      </button>
+      <div class="music-info">
+        <div class="music-title">คืนนี้ขอหอม</div>
+        <div class="music-sub">เพลงประกอบงานแต่งงานของเรา</div>
       </div>
-      <p>หากท่านมีความประสงค์จะร่วมอวยพร สามารถสแกน QR ด้านบนได้ค่ะ</p>
+      <div class="music-volume">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3z"/></svg>
+        <input type="range" id="musicVolume" min="0" max="100" value="70" aria-label="ระดับเสียงเพลง">
+      </div>
     </div>
   </section>
 
@@ -881,21 +921,37 @@
     if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openGate(); }
   });
 
-  // --- background music toggle ---
+  // --- background music (corner toggle + full player share one <audio>) ---
   var bgm = document.getElementById('bgm');
   var bgmToggle = document.getElementById('bgmToggle');
-  bgmToggle.addEventListener('click', function(){
+  var musicPlayBtn = document.getElementById('musicPlayBtn');
+  var musicVolume = document.getElementById('musicVolume');
+  bgm.volume = 0.7;
+
+  function setPlayingUI(isPlaying){
+    bgmToggle.classList.toggle('playing', isPlaying);
+    musicPlayBtn.classList.toggle('playing', isPlaying);
+  }
+
+  function toggleMusic(){
     if(bgm.paused){
       bgm.play().then(function(){
-        bgmToggle.classList.add('playing');
+        setPlayingUI(true);
       }).catch(function(){
         console.warn('เพลงยังไม่ถูกตั้งค่า — ใส่ไฟล์ที่ music/song.mp3');
       });
     } else {
       bgm.pause();
-      bgmToggle.classList.remove('playing');
+      setPlayingUI(false);
     }
+  }
+
+  bgmToggle.addEventListener('click', toggleMusic);
+  musicPlayBtn.addEventListener('click', toggleMusic);
+  musicVolume.addEventListener('input', function(){
+    bgm.volume = musicVolume.value / 100;
   });
+  bgm.addEventListener('ended', function(){ setPlayingUI(false); });
 
   var bride = document.getElementById('brideFig');
   var hearts = document.getElementById('ribbonHearts');
