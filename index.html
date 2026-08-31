@@ -419,11 +419,9 @@
   .dresscode-figs svg{ width:64px; height:96px; }
   .dresscode-figs figcaption{ font-size:.75rem; color:var(--ink-muted); margin-top:8px; }
 
-  /* ---------- gift (torn note) ---------- */
-  .gift-photo{ max-width:280px; margin:0 auto 10px; }
-  .gift-photo img{ width:100%; display:block; border-radius:4px; box-shadow:var(--shadow); }
+  /* ---------- gift (torn note + music player) ---------- */
   .torn-note{
-    position:relative; background:var(--surface); max-width:340px; margin:-14px auto 30px;
+    position:relative; background:var(--surface); max-width:340px; margin:0 auto 30px;
     padding:30px 22px 24px; text-align:center; box-shadow:var(--shadow);
     clip-path: polygon(0% 5%,4% 0%,10% 4%,17% 0%,24% 4%,31% 0%,38% 4%,45% 0%,52% 4%,59% 0%,66% 4%,73% 0%,80% 4%,87% 0%,93% 4%,100% 0%,100% 95%,96% 100%,90% 96%,83% 100%,76% 96%,69% 100%,62% 96%,55% 100%,48% 96%,41% 100%,34% 96%,27% 100%,20% 96%,13% 100%,7% 96%,0% 100%);
   }
@@ -431,30 +429,43 @@
   .torn-note .tape.left{ top:-12px; left:14px; transform:rotate(-9deg); }
   .torn-note .tape.right{ top:-12px; right:14px; transform:rotate(7deg); }
   .torn-note p{ font-family:var(--font-heading); font-size:1.3rem; font-weight:600; color:var(--ink); line-height:1.4; }
-  .music-card{
-    background:var(--surface); border:1px solid var(--line); border-radius:18px;
-    padding:24px 26px; box-shadow:var(--shadow);
-    display:flex; align-items:center; gap:16px; flex-wrap:wrap; justify-content:center;
+
+  .player-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:24px;
+    padding:22px; box-shadow:var(--shadow); max-width:340px; margin:0 auto; text-align:center;
   }
-  .music-play{
-    width:52px; height:52px; border-radius:50%; border:none; cursor:pointer; flex-shrink:0;
+  .player-cover{ width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; margin-bottom:18px; box-shadow:var(--shadow); }
+  .player-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .player-title{ font-family:var(--font-heading); font-size:1.4rem; color:var(--ink); }
+  .player-sub{ font-size:.78rem; color:var(--ink-muted); margin-top:3px; margin-bottom:20px; }
+  .player-seek{ padding:2px 2px 8px; cursor:pointer; }
+  .seek-track{ position:relative; height:4px; background:var(--line); border-radius:2px; }
+  .seek-fill{ position:absolute; left:0; top:0; height:100%; width:0%; background:var(--gold-strong); border-radius:2px; }
+  .seek-dot{
+    position:absolute; top:50%; left:0%; width:12px; height:12px; border-radius:50%;
+    background:var(--gold-strong); box-shadow:var(--shadow); transform:translate(-50%,-50%);
+  }
+  .player-time{ font-size:.72rem; color:var(--ink-muted); letter-spacing:.03em; margin-bottom:20px; }
+  .player-controls{ display:flex; align-items:center; justify-content:center; gap:26px; }
+  .ctrl-btn{ background:none; border:none; cursor:pointer; padding:6px; color:var(--gold-strong); display:flex; align-items:center; justify-content:center; }
+  .ctrl-btn svg{ width:22px; height:22px; }
+  .player-play{
+    width:64px; height:64px; border-radius:50%; border:none; cursor:pointer; flex-shrink:0;
     background:var(--gold-strong); color:var(--navy-ink); display:flex; align-items:center; justify-content:center;
     box-shadow:var(--shadow); transition:filter .15s ease, transform .15s ease;
   }
-  .music-play:hover{ filter:brightness(1.08); }
-  .music-play:active{ transform:scale(.96); }
-  .music-play svg{ width:22px; height:22px; }
-  .music-play .ic-pause{ display:none; }
-  .music-play.playing .ic-play{ display:none; }
-  .music-play.playing .ic-pause{ display:block; }
-  .music-info{ text-align:left; min-width:140px; }
-  .music-title{ font-family:var(--font-heading); font-size:1.1rem; color:var(--ink); }
-  .music-sub{ font-size:.78rem; color:var(--ink-muted); margin-top:2px; }
-  .music-volume{ display:flex; align-items:center; gap:8px; flex:1 1 140px; min-width:120px; color:var(--gold-strong); }
-  .music-volume svg{ width:18px; height:18px; flex-shrink:0; }
-  .music-volume input[type="range"]{
-    flex:1; accent-color:var(--gold-strong); cursor:pointer;
-  }
+  .player-play:hover{ filter:brightness(1.08); }
+  .player-play:active{ transform:scale(.96); }
+  .player-play svg{ width:26px; height:26px; }
+  .player-play .ic-pause{ display:none; }
+  .player-play.playing .ic-play{ display:none; }
+  .player-play.playing .ic-pause{ display:block; }
+  .player-volume{ display:flex; align-items:center; justify-content:center; gap:9px; margin-top:18px; }
+  .player-volume .ctrl-btn{ padding:0; }
+  .player-volume .ic-vol-off{ display:none; }
+  .player-volume .ctrl-btn.muted .ic-vol-on{ display:none; }
+  .player-volume .ctrl-btn.muted .ic-vol-off{ display:block; }
+  .player-volume input[type="range"]{ width:110px; accent-color:var(--gold-strong); cursor:pointer; }
 
   /* ---------- rsvp ---------- */
   .rsvp-card{
@@ -773,24 +784,40 @@
       <span class="eyebrow">With love</span>
       <h2>ของขวัญและการอวยพร</h2>
     </div>
-    <div class="gift-photo">
-      <img src="image/web/gift-photo.jpg" alt="กันตรัตน์และฐากูร" loading="lazy">
-    </div>
     <div class="torn-note">
       <span class="tape left"></span><span class="tape right"></span>
       <p>ความสุขของท่านคือของขวัญที่ดีที่สุดสำหรับเราแล้ว</p>
     </div>
-    <div class="music-card">
-      <button type="button" id="musicPlayBtn" class="music-play" aria-label="เล่น/หยุดเพลง">
-        <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
-      </button>
-      <div class="music-info">
-        <div class="music-title">คืนนี้ขอหอม</div>
-        <div class="music-sub">เพลงประกอบงานแต่งงานของเรา</div>
+    <div class="player-card">
+      <div class="player-cover">
+        <img src="image/web/music-photo.jpg" alt="กันตรัตน์และฐากูร" loading="lazy">
       </div>
-      <div class="music-volume">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3z"/></svg>
+      <div class="player-title">คืนนี้ขอหอม</div>
+      <div class="player-sub">เพลงประกอบงานแต่งงานของเรา</div>
+
+      <div class="player-seek" id="playerSeek">
+        <div class="seek-track"><div class="seek-fill" id="seekFill"></div><div class="seek-dot" id="seekDot"></div></div>
+      </div>
+      <div class="player-time" id="playerTime">คลิกเพื่อฟังเพลง</div>
+
+      <div class="player-controls">
+        <button type="button" id="musicRestartBtn" class="ctrl-btn" aria-label="เริ่มเพลงใหม่ตั้งแต่ต้น">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+        </button>
+        <button type="button" id="musicPlayBtn" class="player-play" aria-label="เล่น/หยุดเพลง">
+          <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        </button>
+        <span class="ctrl-btn" aria-hidden="true" style="visibility:hidden">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+        </span>
+      </div>
+
+      <div class="player-volume">
+        <button type="button" id="musicMuteBtn" class="ctrl-btn" aria-label="ปิด/เปิดเสียง">
+          <svg class="ic-vol-on" viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2A4.5 4.5 0 0 0 14 7.97v8.05A4.48 4.48 0 0 0 16.5 12z"/></svg>
+          <svg class="ic-vol-off" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.42.05-.63zM19 12c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 0 0 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+        </button>
         <input type="range" id="musicVolume" min="0" max="100" value="70" aria-label="ระดับเสียงเพลง">
       </div>
     </div>
@@ -910,48 +937,97 @@
   // --- envelope gate ---
   var gate = document.getElementById('gate');
   document.body.classList.add('gate-lock');
-  function openGate(){
-    if(gate.classList.contains('open')) return;
-    gate.classList.add('open');
-    document.body.classList.remove('gate-lock');
-    setTimeout(function(){ gate.style.display = 'none'; }, reduceMotion ? 0 : 900);
-  }
-  gate.addEventListener('click', openGate);
-  gate.addEventListener('keydown', function(e){
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openGate(); }
-  });
-
   // --- background music (corner toggle + full player share one <audio>) ---
   var bgm = document.getElementById('bgm');
   var bgmToggle = document.getElementById('bgmToggle');
   var musicPlayBtn = document.getElementById('musicPlayBtn');
+  var musicRestartBtn = document.getElementById('musicRestartBtn');
+  var musicMuteBtn = document.getElementById('musicMuteBtn');
   var musicVolume = document.getElementById('musicVolume');
+  var playerSeek = document.getElementById('playerSeek');
+  var seekFill = document.getElementById('seekFill');
+  var seekDot = document.getElementById('seekDot');
+  var playerTime = document.getElementById('playerTime');
   bgm.volume = 0.7;
+
+  function formatTime(sec){
+    if(!isFinite(sec) || sec < 0) sec = 0;
+    var m = Math.floor(sec / 60);
+    var s = Math.floor(sec % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
 
   function setPlayingUI(isPlaying){
     bgmToggle.classList.toggle('playing', isPlaying);
     musicPlayBtn.classList.toggle('playing', isPlaying);
   }
 
+  function attemptPlay(){
+    return bgm.play().then(function(){
+      setPlayingUI(true);
+    }).catch(function(){
+      console.warn('เล่นเพลงอัตโนมัติไม่สำเร็จ — รอผู้ใช้กดเล่นเอง หรือยังไม่ได้ใส่ไฟล์ที่ music/song.mp3');
+    });
+  }
+
   function toggleMusic(){
-    if(bgm.paused){
-      bgm.play().then(function(){
-        setPlayingUI(true);
-      }).catch(function(){
-        console.warn('เพลงยังไม่ถูกตั้งค่า — ใส่ไฟล์ที่ music/song.mp3');
-      });
-    } else {
-      bgm.pause();
-      setPlayingUI(false);
-    }
+    if(bgm.paused){ attemptPlay(); }
+    else { bgm.pause(); setPlayingUI(false); }
   }
 
   bgmToggle.addEventListener('click', toggleMusic);
   musicPlayBtn.addEventListener('click', toggleMusic);
+
+  musicRestartBtn.addEventListener('click', function(){
+    bgm.currentTime = 0;
+  });
+
+  musicMuteBtn.addEventListener('click', function(){
+    bgm.muted = !bgm.muted;
+    musicMuteBtn.classList.toggle('muted', bgm.muted);
+  });
+
   musicVolume.addEventListener('input', function(){
     bgm.volume = musicVolume.value / 100;
+    if(bgm.volume > 0 && bgm.muted){
+      bgm.muted = false;
+      musicMuteBtn.classList.remove('muted');
+    }
   });
+
+  function updateSeekUI(){
+    var dur = bgm.duration;
+    var pct = (dur && isFinite(dur)) ? (bgm.currentTime / dur) * 100 : 0;
+    seekFill.style.width = pct + '%';
+    seekDot.style.left = pct + '%';
+    playerTime.textContent = (dur && isFinite(dur))
+      ? formatTime(bgm.currentTime) + ' / ' + formatTime(dur)
+      : 'คลิกเพื่อฟังเพลง';
+  }
+  bgm.addEventListener('timeupdate', updateSeekUI);
+  bgm.addEventListener('loadedmetadata', updateSeekUI);
+
+  function seekFromEvent(e){
+    var rect = playerSeek.getBoundingClientRect();
+    var clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    var ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    if(isFinite(bgm.duration)){ bgm.currentTime = ratio * bgm.duration; }
+  }
+  playerSeek.addEventListener('click', seekFromEvent);
+
   bgm.addEventListener('ended', function(){ setPlayingUI(false); });
+
+  function openGate(){
+    if(gate.classList.contains('open')) return;
+    gate.classList.add('open');
+    document.body.classList.remove('gate-lock');
+    setTimeout(function(){ gate.style.display = 'none'; }, reduceMotion ? 0 : 900);
+    attemptPlay(); // gate click is a real user gesture, so autoplay-with-sound is allowed here
+  }
+  gate.addEventListener('click', openGate);
+  gate.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openGate(); }
+  });
 
   var bride = document.getElementById('brideFig');
   var hearts = document.getElementById('ribbonHearts');
