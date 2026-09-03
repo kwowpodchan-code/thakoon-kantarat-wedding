@@ -110,6 +110,52 @@
   .empty-state{ padding:40px 20px; text-align:center; color:var(--ink-muted); }
   .loading-state{ padding:40px 20px; text-align:center; color:var(--ink-muted); }
 
+  .edit-guests-btn{
+    margin-left:6px; width:22px; height:22px; border:none; background:none; color:var(--ink-muted);
+    cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+    vertical-align:middle; border-radius:6px; padding:0;
+  }
+  .edit-guests-btn:hover{ color:var(--gold-strong); background:var(--gold-pale); }
+  .edit-guests-btn svg{ width:14px; height:14px; }
+  .host-badge{
+    display:inline-block; margin-left:6px; padding:2px 8px; border-radius:999px;
+    background:var(--gold-pale); color:var(--gold-strong); font-size:.68rem; font-weight:600; white-space:nowrap;
+  }
+
+  /* edit-guests modal */
+  .edit-modal{
+    position:fixed; inset:0; z-index:100; background:rgba(20,16,10,.5);
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .edit-modal.show{ display:flex; }
+  .edit-modal-inner{
+    position:relative; background:var(--surface); border:1px solid var(--line); border-radius:16px;
+    padding:30px 26px 26px; max-width:340px; width:100%; box-shadow:var(--shadow);
+  }
+  .edit-modal-close{
+    position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%;
+    background:var(--bg); border:1px solid var(--line); color:var(--ink); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .edit-modal-close svg{ width:16px; height:16px; }
+  .edit-modal-inner h2{ margin:0 0 4px; font-size:1.15rem; }
+  .edit-modal-name{ color:var(--ink-muted); font-size:.85rem; margin:0 0 20px; }
+  #editGuestsForm{ display:flex; flex-direction:column; gap:12px; text-align:left; }
+  #editGuestsForm label{ font-size:.75rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-muted); }
+  #editGuestsInput{
+    width:100%; background:var(--bg); border:1px solid var(--line); border-radius:10px;
+    padding:11px 13px; font-size:1rem; color:var(--ink); font-family:inherit;
+  }
+  #editGuestsInput:focus{ outline:none; border-color:var(--gold-strong); box-shadow:0 0 0 3px var(--gold-pale); }
+  .edit-error{ display:none; color:var(--bad); font-size:.82rem; }
+  .edit-error.show{ display:block; }
+  #editSaveBtn{
+    margin-top:4px; padding:12px; border:none; border-radius:999px; cursor:pointer;
+    background:var(--gold-strong); color:var(--navy-ink); font-weight:600; font-size:.95rem;
+  }
+  #editSaveBtn:disabled{ opacity:.6; cursor:default; }
+  .edit-modal-hint{ font-size:.72rem; color:var(--ink-muted); margin:16px 0 0; }
+
   @media (max-width:560px){
     .msg-cell{ max-width:140px; }
   }
@@ -170,6 +216,25 @@
         <div class="empty-state" id="emptyState" style="display:none;">ยังไม่มีใครตอบรับเลยตอนนี้</div>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="edit-modal" id="editGuestsModal" role="dialog" aria-modal="true" aria-label="แก้ไขจำนวนผู้มางาน">
+  <div class="edit-modal-inner">
+    <button type="button" class="edit-modal-close" id="editModalClose" aria-label="ปิด">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <h2>แก้ไขจำนวนผู้มางาน</h2>
+    <p class="edit-modal-name" id="editModalName"></p>
+    <form id="editGuestsForm">
+      <div>
+        <label for="editGuestsInput">จำนวนผู้มางาน</label>
+        <input type="number" id="editGuestsInput" min="1" max="10" required>
+      </div>
+      <span class="edit-error" id="editError">บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</span>
+      <button type="submit" id="editSaveBtn">บันทึก</button>
+    </form>
+    <p class="edit-modal-hint">การแก้ไขนี้จะขึ้นป้าย "แก้ไขโดยเจ้าภาพ" กำกับไว้ในตาราง</p>
   </div>
 </div>
 
@@ -308,12 +373,16 @@
     tbody.innerHTML = rows.map(function(r){
       var statusClass = r.attend === 'yes' ? 'yes' : 'no';
       var statusLabel = r.attend === 'yes' ? 'มาร่วมงาน' : 'ไม่สามารถมาได้';
+      var editBtn = '<button type="button" class="edit-guests-btn" data-device-id="' + r.device_id + '" aria-label="แก้ไขจำนวนผู้มางาน">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>' +
+        '</button>';
+      var hostBadge = r.edited_by_host ? ' <span class="host-badge">แก้ไขโดยเจ้าภาพ</span>' : '';
       return '<tr>' +
         '<td>' + escapeHtml(r.name) + '</td>' +
         '<td><span class="pill-status ' + statusClass + '">' + statusLabel + '</span></td>' +
-        '<td>' + (r.guests || 1) + '</td>' +
+        '<td>' + (r.guests || 1) + editBtn + '</td>' +
         '<td class="msg-cell">' + escapeHtml(r.message || '—') + '</td>' +
-        '<td class="time-cell">' + formatTime(r.updated_at) + '</td>' +
+        '<td class="time-cell">' + formatTime(r.updated_at) + hostBadge + '</td>' +
         '</tr>';
     }).join('');
   }
@@ -322,6 +391,96 @@
     var q = searchInput.value.trim().toLowerCase();
     var filtered = q ? allRows.filter(function(r){ return (r.name || '').toLowerCase().indexOf(q) !== -1; }) : allRows;
     renderTable(filtered);
+  });
+
+  // --- แก้ไขจำนวนผู้มางาน (เจ้าภาพ) ---
+  // ไม่ใช้ UPDATE เด็ดขาด (เคยพิสูจน์แล้วว่าใช้งานไม่ได้ผ่าน Supabase API — ดู supabase-setup.md)
+  // ใช้ลอจิก append-only แบบเดียวกับตอนแขกแก้ไขคำตอบ: insert แถวใหม่ device_id เดิม
+  // ค่าอื่นคัดลอกมา เปลี่ยนแค่ guests + updated_at ใหม่ + ติดป้าย edited_by_host
+  var editModal = document.getElementById('editGuestsModal');
+  var editModalClose = document.getElementById('editModalClose');
+  var editModalName = document.getElementById('editModalName');
+  var editGuestsForm = document.getElementById('editGuestsForm');
+  var editGuestsInput = document.getElementById('editGuestsInput');
+  var editSaveBtn = document.getElementById('editSaveBtn');
+  var editError = document.getElementById('editError');
+  var editingRow = null;
+
+  function openEditModal(row){
+    editingRow = row;
+    editModalName.textContent = row.name + ' — ' + (row.attend === 'yes' ? 'มาร่วมงาน' : 'ไม่สามารถมาได้');
+    editGuestsInput.value = row.guests || 1;
+    editError.classList.remove('show');
+    editModal.classList.add('show');
+    editGuestsInput.focus();
+  }
+  function closeEditModal(){
+    editModal.classList.remove('show');
+    editingRow = null;
+  }
+  editModalClose.addEventListener('click', closeEditModal);
+  editModal.addEventListener('click', function(e){
+    if(e.target === editModal) closeEditModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && editModal.classList.contains('show')) closeEditModal();
+  });
+
+  document.getElementById('rsvpTableBody').addEventListener('click', function(e){
+    var btn = e.target.closest('.edit-guests-btn');
+    if(!btn) return;
+    var deviceId = btn.getAttribute('data-device-id');
+    var row = allRows.find(function(r){ return r.device_id === deviceId; });
+    if(row) openEditModal(row);
+  });
+
+  editGuestsForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!editingRow) return;
+    var newGuests = parseInt(editGuestsInput.value, 10);
+    if(!newGuests || newGuests < 1){
+      editError.textContent = 'กรุณาใส่จำนวนที่ถูกต้อง';
+      editError.classList.add('show');
+      return;
+    }
+    editError.classList.remove('show');
+    editSaveBtn.disabled = true;
+
+    var payload = {
+      device_id: editingRow.device_id,
+      name: editingRow.name,
+      attend: editingRow.attend,
+      guests: newGuests,
+      message: editingRow.message,
+      updated_at: new Date().toISOString(),
+      edited_by_host: true
+    };
+
+    fetch(SUPABASE_URL + '/rest/v1/rsvp_responses', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    }).then(function(res){
+      editSaveBtn.disabled = false;
+      if(res.ok){
+        closeEditModal();
+        loadData(); // โหลดใหม่ — แถวที่เพิ่งเพิ่มจะกลายเป็นคำตอบล่าสุดของแขกคนนี้เองผ่าน dedup logic เดิม
+      } else {
+        editError.textContent = 'บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+        editError.classList.add('show');
+        res.text().then(function(t){ console.error('Edit guests error:', res.status, t); });
+      }
+    }).catch(function(err){
+      editSaveBtn.disabled = false;
+      editError.textContent = 'บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+      editError.classList.add('show');
+      console.error(err);
+    });
   });
 
   if(getToken()){ showDashboard(); } else { showLogin(); }
